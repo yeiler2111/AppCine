@@ -7,12 +7,14 @@ from app.services.payment_service import PaymentService
 from app.services.ticket_service import TicketService
 from app.services.seat_service import SeatService
 from app.schemas.payment_schema import PaymentCreate, PaymentResponse
+from app.core.security import get_current_user
+
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
 
 @router.post("/", response_model=PaymentResponse)
-async def process_payment(payment_data: PaymentCreate, db: AsyncSession = Depends(get_db)):
+async def process_payment(payment_data: PaymentCreate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     ticket_service = TicketService(db)
     seat_service = SeatService(db)
 
@@ -30,7 +32,7 @@ async def process_payment(payment_data: PaymentCreate, db: AsyncSession = Depend
 
 
 @router.get("/by-user/{user_id}", response_model=List[PaymentResponse])
-async def get_user_payments(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_user_payments(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     ticket_service = TicketService(db)
     seat_service = SeatService(db)
     service = PaymentService(db, ticket_service, seat_service)

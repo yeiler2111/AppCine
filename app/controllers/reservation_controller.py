@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import List
+from app.core.security import get_current_user
+
 
 from app.services.reservation_service import ReservationService
 
@@ -18,7 +20,7 @@ class ReleaseSeatsRequest(BaseModel):
 
 
 @router.post("/reserve")
-async def reserve_seats(data: ReserveSeatsRequest):
+async def reserve_seats(data: ReserveSeatsRequest, current_user=Depends(get_current_user)):
     service = ReservationService()
     return await service.reserve_seats(
         showtime_id=data.showtime_id,
@@ -27,7 +29,7 @@ async def reserve_seats(data: ReserveSeatsRequest):
     )
 
 @router.post("/release")
-async def release_seats(data: ReleaseSeatsRequest):
+async def release_seats(data: ReleaseSeatsRequest, current_user=Depends(get_current_user)):
     service = ReservationService()
     return await service.release_seats(
         showtime_id=data.showtime_id,
@@ -36,7 +38,7 @@ async def release_seats(data: ReleaseSeatsRequest):
     )
 
 @router.get("/availability/{showtime_id}/{seat_id}")
-async def check_availability(showtime_id: int, seat_id: int):
+async def check_availability(showtime_id: int, seat_id: int, current_user=Depends(get_current_user)):
     service = ReservationService()
     available = await service.check_availability(showtime_id, seat_id)
     return {"seat_id": seat_id, "available": available}

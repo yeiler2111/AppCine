@@ -4,18 +4,20 @@ from typing import List
 from app.database import get_db
 from app.services.user_service import UserService
 from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
+from app.core.security import get_current_user
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get("/", response_model=List[UserResponse])
-async def list_users(db: AsyncSession = Depends(get_db)):
+async def list_users(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = UserService(db)
     return await service.list_users()
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = UserService(db)
     user = await service.get_user(user_id)
     if not user:
@@ -37,7 +39,7 @@ async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_db))
 
 
 @router.put("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = Depends(get_db)):
+async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     """
     Actualiza un usuario existente.
     Si se incluye `password`, se encripta automáticamente antes de guardar.
@@ -50,7 +52,7 @@ async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = De
 
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = UserService(db)
     deleted = await service.delete_user(user_id)
     if not deleted:

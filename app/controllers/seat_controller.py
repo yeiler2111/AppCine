@@ -4,16 +4,18 @@ from typing import List
 from app.database import get_db
 from app.services.seat_service import SeatService
 from app.schemas.seat_schema import SeatCreate, SeatUpdate, SeatResponse, BulkSeatCreate
+from app.core.security import get_current_user
+
 
 router = APIRouter(prefix="/seats", tags=["Seats"])
 
 @router.get("/", response_model=List[SeatResponse])
-async def list_seats(db: AsyncSession = Depends(get_db)):
+async def list_seats(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     return await service.list_seats()
 
 @router.get("/{seat_id}", response_model=SeatResponse)
-async def get_seat(seat_id: int, db: AsyncSession = Depends(get_db)):
+async def get_seat(seat_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     seat = await service.get_seat(seat_id)
     if not seat:
@@ -21,7 +23,7 @@ async def get_seat(seat_id: int, db: AsyncSession = Depends(get_db)):
     return seat
 
 @router.get("/room/{room_id}", response_model=List[SeatResponse])
-async def get_seats_by_room(room_id: int, db: AsyncSession = Depends(get_db)):
+async def get_seats_by_room(room_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     return await service.get_seats_by_room(room_id)
 
@@ -29,7 +31,8 @@ async def get_seats_by_room(room_id: int, db: AsyncSession = Depends(get_db)):
 async def get_seats_by_showtime(
     room_id: int,
     showtime_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user)
 ):
     """
     Obtiene los asientos de una sala (`room_id`) con el estado de disponibilidad
@@ -39,17 +42,17 @@ async def get_seats_by_showtime(
     return await service.get_seats_by_showtime(room_id, showtime_id)
 
 @router.post("/", response_model=SeatResponse)
-async def create_seat(seat_data: SeatCreate, db: AsyncSession = Depends(get_db)):
+async def create_seat(seat_data: SeatCreate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     return await service.create_seat(seat_data)
 
 @router.post("/bulk", response_model=List[SeatResponse])
-async def create_bulk_seats(bulk_data: BulkSeatCreate, db: AsyncSession = Depends(get_db)):
+async def create_bulk_seats(bulk_data: BulkSeatCreate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     return await service.create_bulk_seats(bulk_data)
 
 @router.put("/{seat_id}", response_model=SeatResponse)
-async def update_seat(seat_id: int, seat_data: SeatUpdate, db: AsyncSession = Depends(get_db)):
+async def update_seat(seat_id: int, seat_data: SeatUpdate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     updated = await service.update_seat(seat_id, seat_data)
     if not updated:
@@ -57,7 +60,7 @@ async def update_seat(seat_id: int, seat_data: SeatUpdate, db: AsyncSession = De
     return updated
 
 @router.delete("/{seat_id}")
-async def delete_seat(seat_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_seat(seat_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = SeatService(db)
     deleted = await service.delete_seat(seat_id)
     if not deleted:

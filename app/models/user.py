@@ -1,6 +1,14 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
+import enum
+
+
+class Role(enum.Enum):
+    CLIENT = "CLIENTE"
+    ADMINISTRATOR = "ADMINISTRADOR"
+
+
 
 class User(Base):
     __tablename__ = "users"
@@ -10,6 +18,7 @@ class User(Base):
     email = Column(String(150), unique=True, nullable=False)
     phone = Column(String(20), nullable=True)
     password_hash = Column(String(255), nullable=False)
+    role = Column(Enum(Role), nullable=False, default=Role.CLIENT)
 
     # Relaciónes
     tickets = relationship("Ticket", back_populates="user")

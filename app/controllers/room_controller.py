@@ -4,16 +4,18 @@ from typing import List
 from app.database import get_db
 from app.services.room_service import RoomService
 from app.schemas.room_schema import RoomCreate, RoomUpdate, RoomResponse
+from app.core.security import get_current_user
+
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
 @router.get("/", response_model=List[RoomResponse])
-async def list_rooms(db: AsyncSession = Depends(get_db)):
+async def list_rooms(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = RoomService(db)
     return await service.list_rooms()
 
 @router.get("/{room_id}", response_model=RoomResponse)
-async def get_room(room_id: int, db: AsyncSession = Depends(get_db)):
+async def get_room(room_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = RoomService(db)
     room = await service.get_room(room_id)
     if not room:
@@ -21,12 +23,12 @@ async def get_room(room_id: int, db: AsyncSession = Depends(get_db)):
     return room
 
 @router.post("/", response_model=RoomResponse)
-async def create_room(room_data: RoomCreate, db: AsyncSession = Depends(get_db)):
+async def create_room(room_data: RoomCreate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = RoomService(db)
     return await service.create_room(room_data)
 
 @router.put("/{room_id}", response_model=RoomResponse)
-async def update_room(room_id: int, room_data: RoomUpdate, db: AsyncSession = Depends(get_db)):
+async def update_room(room_id: int, room_data: RoomUpdate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = RoomService(db)
     updated = await service.update_room(room_id, room_data)
     if not updated:
@@ -34,7 +36,7 @@ async def update_room(room_id: int, room_data: RoomUpdate, db: AsyncSession = De
     return updated
 
 @router.delete("/{room_id}")
-async def delete_room(room_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_room(room_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     service = RoomService(db)
     deleted = await service.delete_room(room_id)
     if not deleted:
