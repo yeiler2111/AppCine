@@ -11,7 +11,7 @@ async def init_models():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-        print("✔️ Tablas borradas y creadas con éxito.")
+        print("Tablas borradas y creadas con éxito.")
 
     async with async_session() as session:
         # Usuarios
@@ -59,7 +59,7 @@ async def init_models():
         session.add_all(seat_list)
 
         await session.commit()
-        print("✅ Datos iniciales insertados con éxito.")
+        print("Datos iniciales insertados con éxito.")
 
 if __name__ == "__main__":
     asyncio.run(init_models())
